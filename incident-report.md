@@ -1,28 +1,43 @@
-# Incident Report - SSH Brute Force Attack
+SSH Brute Force Detection
 
-## Summary
-- **Date:** 2026-06-19
-- **Severity:** Medium
-- **Status:** True Positive
+Date: 2026-06-19
+Severity: Medium
+Status: True Positive
 
-## Description
-195 failed SSH login attempts detected targeting invalid user "wronguser" from IP 127.0.0.1.
+Description
 
-## Timeline
-- 02:25 - First failed login detected
-- 02:57 - Brute force activity continued (20+ attempts)
-- 03:00 - Alert triggered in Splunk
+Multiple failed SSH authentication attempts were detected against an invalid account (wronguser). The activity matched a brute-force attack pattern.
 
-## Investigation
-- **Source IP:** 127.0.0.1
-- **Target user:** wronguser (invalid user)
-- **Total attempts:** 195
-- **Successful login:** No
+Timeline
+Time	Event
+02:25	First failed SSH login detected
+02:57	Multiple failed login attempts observed
+03:00	Splunk alert triggered
+03:01	Investigation initiated
+03:05	Activity confirmed as brute-force attempt
+Investigation Findings
+Source IP: 127.0.0.1
+Target Account: wronguser
+Failed Attempts: 195
+Successful Authentication: None
+Data Source: Linux Authentication Logs ingested into Splunk
+Detection Query
+index=linux sourcetype=linux_secure "Failed password"
+| stats count by src_ip user
+| where count > 20
+Analysis
 
-## Verdict
-**True Positive** - Brute force attack pattern confirmed.
+The source generated a high volume of failed authentication attempts within a short period. No successful login was observed. The activity is consistent with credential brute-forcing.
 
-## Recommendation
-- Block source IP via firewall
-- Enable fail2ban to auto-block repeated failures
-- Monitor for further activity
+Verdict
+
+True Positive
+
+Recommendations
+Block malicious source IP
+Enable fail2ban
+Enforce strong password policies
+Implement MFA where possible
+Lab Note
+
+This activity was generated in a controlled lab environment. Source IP 127.0.0.1 represents localhost and was used to simulate attack behavior for detection engineering practice.
